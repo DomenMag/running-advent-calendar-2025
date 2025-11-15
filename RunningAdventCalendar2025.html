@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Running Advent Calendar 2025</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  body {
+    margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(to bottom, #0b3d91, #1c92d2);
+    color: #fff; min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center;
+  }
+  h1 { margin: 2.5rem 0 1rem; font-size: 2.5rem; text-shadow: 0 2px 4px rgba(0,0,0,.5); }
+  .container { max-width: 900px; width: 100%; padding: 0 1rem; }
+  .setup { text-align: center; background: rgba(0,0,0,.2); padding: 1.5rem; border-radius: 12px; margin: 1rem 0; }
+  input { padding: 12px; font-size: 1.1rem; width: 260px; border-radius: 6px; border: none; margin: 0 8px; }
+  button { padding: 12px 24px; font-size: 1.1rem; background: #ff4d4d; color: white; border: none; border-radius: 6px; cursor: pointer; }
+  button:hover { background: #ff1a1a; }
+  .calendar { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 12px; perspective: 1000px; margin-top: 2rem; }
+  .door { position: relative; width: 100%; padding-bottom: 100%; background: #c41e3a; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,.4); cursor: pointer; transition: transform .3s; overflow: hidden; }
+  .door:hover { transform: translateY(-4px); }
+  .door .front, .door .back { position: absolute; inset: 0; backface-visibility: hidden; display: flex; align-items: center; justify-content: center; border-radius: 8px; }
+  .door .front { background: linear-gradient(135deg, #c41e3a, #ff4d4d); color: #fff; font-size: 1.8rem; text-shadow: 0 1px 2px rgba(0,0,0,.5); }
+  .door .back { background: #fff; color: #c41e3a; transform: rotateY(180deg); font-size: 1.2rem; flex-direction: column; padding: 8px; }
+  .door.flipped .front { transform: rotateY(180deg); }
+  .door.flipped .back { transform: rotateY(0); }
+  .distance { font-size: 1.8rem; margin-top: 4px; font-weight: bold; }
+  .share { margin: 1.5rem 0; font-size: 0.9rem; }
+  .share input { width: 100%; max-width: 500px; }
+  footer { margin: 2rem 0; font-size: .9rem; opacity: .8; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>Running Advent Calendar 2025</h1>
+
+  <div class="setup" id="setup">
+    <p><strong>Enter your secret seed</strong> (e.g. your name, team, or "slovenia2025"):</p>
+    <input type="text" id="seedInput" placeholder="Type here..." value="">
+    <button id="generate">Generate</button>
+    <p style="margin-top:1rem;">
+      Share the <u>same seed</u> → everyone gets the <u>same calendar</u>!
+    </p>
+  </div>
+
+  <div id="result" style="display:none;">
+    <div class="share">
+      <p><strong>Share this link:</strong></p>
+      <input type="text" id="shareLink" readonly>
+    </div>
+    <div class="calendar" id="calendar"></div>
+  </div>
+</div>
+
+<footer>
+  Open one door per day from Dec 1 to Dec 24! Print: Ctrl+P → Save as PDF
+</footer>
+
+<script>
+// --- Seeded Random (deterministic) ---
+function seededRandom(seed) {
+  let h = 1779033703 ^ seed.length;
+  for (let i = 0; i < seed.length; i++) {
+    h = Math.imul(h ^ seed.charCodeAt(i), 3432918353);
+    h = h << 13 | h >>> 19;
+  }
+  return function() {
+    h = Math.imul(h ^ (h >>> 16), 2246822507);
+    h = Math.imul(h ^ (h >>> 13), 3266489909);
+    return (h ^= h >>> 16) >>> 0;
+  };
+}
+
+function seededShuffle(array, seedStr) {
+  const arr = [...array];
+  const rand = seededRandom(seedStr);
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor((rand() / 4294967296) * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+// --- URL handling ---
+const urlParams = new URLSearchParams(window.location.search);
+const urlSeed = urlParams.get('seed');
+if (urlSeed) {
+  document.getElementById('seedInput').value = urlSeed;
+  generateCalendar();
+}
+
+document.getElementById('generate').addEventListener('click', generateCalendar);
+
+function generateCalendar() {
+  const seed = document.getElementById('seedInput').value.trim();
+  if (!seed) { alert('Please enter a seed!'); return; }
+
+  const distances = seededShuffle(Array.from({length: 24}, (_, i) => i + 1), seed);
+
+  // Update URL
+  const newUrl = new URL(window.location);
+  newUrl.searchParams.set('seed', seed);
+  history.replaceState(null, '', newUrl);
+
+  // Share link
+  document.getElementById('shareLink').value = newUrl.toString();
+
+  // Show result
+  document.getElementById('setup').style.display = 'none';
+  document.getElementById('result').style.display = 'block';
+
+  // Render doors
+  const calendar = document.getElementById('calendar');
+  calendar.innerHTML = '';
+  distances.forEach((dist, i) => {
+    const day = i + 1;
+    const door = document.createElement('div');
+    door.className = 'door';
+    door.innerHTML = `
+      <div class="front">${day}</div>
+      <div class="back">
+        <div>Dec ${day}</div>
+        <div class="distance">${dist} km</div>
+      </div>
+    `;
+    door.addEventListener('click', () => door.classList.toggle('flipped'));
+    calendar.appendChild(door);
+  });
+}
+</script>
+</body>
+</html>
