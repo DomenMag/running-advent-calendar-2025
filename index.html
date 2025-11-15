@@ -1,65 +1,138 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="sl">
 <head>
 <meta charset="UTF-8">
-<title>Running Advent Calendar 2025</title>
+<title>Božični Tekaški Koledar 2025</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="https://flagcdn.com/si.svg">
 <style>
+  :root { --red: #c41e3a; --light-red: #ff4d4d; --snow: #fff; }
+  * { box-sizing: border-box; }
   body {
     margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif;
     background: linear-gradient(to bottom, #0b3d91, #1c92d2);
-    color: #fff; min-height: 100vh;
-    display: flex; flex-direction: column; align-items: center;
+    color: #fff; min-height: 100vh; overflow: hidden;
+    position: relative; display: flex; flex-direction: column; align-items: center;
   }
-  h1 { margin: 2.5rem 0 1rem; font-size: 2.5rem; text-shadow: 0 2px 4px rgba(0,0,0,.5); }
-  .container { max-width: 900px; width: 100%; padding: 0 1rem; }
-  .setup { text-align: center; background: rgba(0,0,0,.2); padding: 1.5rem; border-radius: 12px; margin: 1rem 0; }
-  input { padding: 12px; font-size: 1.1rem; width: 260px; border-radius: 6px; border: none; margin: 0 8px; }
-  button { padding: 12px 24px; font-size: 1.1rem; background: #ff4d4d; color: white; border: none; border-radius: 6px; cursor: pointer; }
+  h1 {
+    margin: 2rem 0 1rem; font-size: 2.4rem; text-shadow: 0 2px 4px rgba(0,0,0,.5);
+    z-index: 2;
+  }
+h1::before { content: "🎄"; margin-right: 12px; font-size: 2rem; }
+h1::after { content: "🎄"; margin-left: 12px; font-size: 2rem; }
+  .container { max-width: 900px; width: 100%; padding: 0 1rem; z-index: 2; }
+  .setup {
+    text-align: center; background: rgba(0,0,0,.3); padding: 1.5rem; border-radius: 12px; margin: 1rem 0;
+    backdrop-filter: blur(5px);
+  }
+  input {
+    padding: 12px; font-size: 1.1rem; width: 260px; border-radius: 6px; border: none; margin: 8px;
+  }
+  button {
+    padding: 12px 24px; font-size: 1.1rem; background: var(--light-red); color: white;
+    border: none; border-radius: 6px; cursor: pointer; transition: .2s;
+  }
   button:hover { background: #ff1a1a; }
-  .calendar { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 12px; perspective: 1000px; margin-top: 2rem; }
-  .door { position: relative; width: 100%; padding-bottom: 100%; background: #c41e3a; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,.4); cursor: pointer; transition: transform .3s; overflow: hidden; }
+  .calendar {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 12px; perspective: 1000px; margin: 2rem 0; z-index: 2;
+  }
+  .door {
+    position: relative; width: 100%; padding-bottom: 100%; background: var(--red);
+    border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,.4); cursor: pointer;
+    transition: transform .3s; overflow: hidden;
+  }
   .door:hover { transform: translateY(-4px); }
-  .door .front, .door .back { position: absolute; inset: 0; backface-visibility: hidden; display: flex; align-items: center; justify-content: center; border-radius: 8px; }
-  .door .front { background: linear-gradient(135deg, #c41e3a, #ff4d4d); color: #fff; font-size: 1.8rem; text-shadow: 0 1px 2px rgba(0,0,0,.5); }
-  .door .back { background: #fff; color: #c41e3a; transform: rotateY(180deg); font-size: 1.2rem; flex-direction: column; padding: 8px; }
+  .door.today { outline: 4px solid gold; outline-offset: 2px; }
+  .door .front, .door .back {
+    position: absolute; inset: 0; backface-visibility: hidden;
+    display: flex; align-items: center; justify-content: center; border-radius: 8px;
+  }
+  .door .front {
+    background: linear-gradient(135deg, var(--red), var(--light-red));
+    color: #fff; font-size: 1.8rem; text-shadow: 0 1px 2px rgba(0,0,0,.5);
+  }
+  .door .back {
+    background: #fff; color: var(--red); transform: rotateY(180deg);
+    font-size: 1.2rem; flex-direction: column; padding: 8px;
+  }
   .door.flipped .front { transform: rotateY(180deg); }
   .door.flipped .back { transform: rotateY(0); }
   .distance { font-size: 1.8rem; margin-top: 4px; font-weight: bold; }
-  .share { margin: 1.5rem 0; font-size: 0.9rem; }
-  .share input { width: 100%; max-width: 500px; }
-  footer { margin: 2rem 0; font-size: .9rem; opacity: .8; }
+  .share, .print-btn { margin: 1rem 0; text-align: center; z-index: 2; }
+  .share input { width: 100%; max-width: 500px; padding: 10px; border-radius: 6px; }
+  .print-btn button { background: #4CAF50; }
+  .print-btn button:hover { background: #45a049; }
+  footer { margin: 2rem 0; font-size: .9rem; opacity: .8; z-index: 2; }
+
+  /* --- SNEŽINKE (BREZ SCROLLA) --- */
+  .snow-container {
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    pointer-events: none; z-index: 1; overflow: hidden;
+  }
+  .snowflake {
+    position: absolute; color: var(--snow);
+    animation: fall linear infinite; user-select: none;
+  }
+  @keyframes fall {
+    to { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+  }
 </style>
 </head>
 <body>
 
+<!-- Snežinke container -->
+<div class="snow-container" id="snowContainer"></div>
+
 <div class="container">
-  <h1>Running Advent Calendar 2025</h1>
+  <h1>Božični Tekaški Koledar 2025</h1>
 
   <div class="setup" id="setup">
-    <p><strong>Enter your secret seed</strong> (e.g. your name, team, or "slovenia2025"):</p>
-    <input type="text" id="seedInput" placeholder="Type here..." value="">
-    <button id="generate">Generate</button>
-    <p style="margin-top:1rem;">
-      Share the <u>same seed</u> → everyone gets the <u>same calendar</u>!
+    <p><strong>Vnesi skrivno geslo</strong> (npr. tvoje ime, ekipa ali "slovenia2025"):</p>
+    <input type="text" id="seedInput" placeholder="Vnesi tukaj..." value="">
+    <button id="generate">Ustvari Koledar</button>
+    <p style="margin-top:1rem; font-size:0.95rem;">
+      Deli <u>isto geslo</u> → vsi imajo <u>isti vrstni red</u>!
     </p>
   </div>
 
   <div id="result" style="display:none;">
     <div class="share">
-      <p><strong>Share this link:</strong></p>
+      <p><strong>Deli povezavo:</strong></p>
       <input type="text" id="shareLink" readonly>
+      <button onclick="copyLink()" style="margin-left:8px; padding:8px 16px;">Kopiraj</button>
+    </div>
+    <div class="print-btn">
+      <button onclick="window.print()">Tiskaj PDF</button>
     </div>
     <div class="calendar" id="calendar"></div>
   </div>
 </div>
 
 <footer>
-  Open one door per day from Dec 1 to Dec 24! Print: Ctrl+P → Save as PDF
+  Odpri eno vratca na dan: 1.–24. december | Skupaj: 300 km | #TekNaBožič
 </footer>
 
+<audio id="jingle" src="https://cdn.freesound.org/previews/612/612552_5674468-lq.mp3" preload="auto"></audio>
+
 <script>
-// --- Seeded Random (deterministic) ---
+// --- SNEŽINKE (POPRAVLJENO: prave snežinke!) ---
+const snowContainer = document.getElementById('snowContainer');
+function createSnowflake() {
+  const s = document.createElement('div');
+  s.className = 'snowflake';
+  s.innerText = ['❄', '❄', '❄'][Math.floor(Math.random() * 3)];
+  s.style.left = Math.random() * 100 + 'vw';
+  s.style.animationDuration = Math.random() * 3 + 4 + 's';
+  s.style.opacity = Math.random() * 0.5 + 0.5;
+  s.style.fontSize = Math.random() * 10 + 10 + 'px';
+  s.style.top = '-20px';
+  snowContainer.appendChild(s);
+  setTimeout(() => s.remove(), 8000);
+}
+setInterval(createSnowflake, 300);
+
+// --- Seeded Random ---
 function seededRandom(seed) {
   let h = 1779033703 ^ seed.length;
   for (let i = 0; i < seed.length; i++) {
@@ -72,7 +145,6 @@ function seededRandom(seed) {
     return (h ^= h >>> 16) >>> 0;
   };
 }
-
 function seededShuffle(array, seedStr) {
   const arr = [...array];
   const rand = seededRandom(seedStr);
@@ -83,52 +155,76 @@ function seededShuffle(array, seedStr) {
   return arr;
 }
 
-// --- URL handling ---
+// --- Local Storage ---
+const STORAGE_KEY = 'runningAdvent2025_seed';
+function saveSeed(seed) { localStorage.setItem(STORAGE_KEY, seed); }
+function loadSeed() { return localStorage.getItem(STORAGE_KEY); }
+
+// --- URL & Generate ---
 const urlParams = new URLSearchParams(window.location.search);
 const urlSeed = urlParams.get('seed');
-if (urlSeed) {
-  document.getElementById('seedInput').value = urlSeed;
-  generateCalendar();
+const savedSeed = loadSeed();
+
+if (urlSeed || savedSeed) {
+  const seed = urlSeed || savedSeed;
+  document.getElementById('seedInput').value = seed;
+  generateCalendar(seed);
 }
 
-document.getElementById('generate').addEventListener('click', generateCalendar);
-
-function generateCalendar() {
+document.getElementById('generate').addEventListener('click', () => {
   const seed = document.getElementById('seedInput').value.trim();
-  if (!seed) { alert('Please enter a seed!'); return; }
+  if (!seed) return alert('Vnesi geslo!');
+  saveSeed(seed);
+  generateCalendar(seed);
+});
 
+function generateCalendar(seed = document.getElementById('seedInput').value.trim()) {
   const distances = seededShuffle(Array.from({length: 24}, (_, i) => i + 1), seed);
-
-  // Update URL
   const newUrl = new URL(window.location);
   newUrl.searchParams.set('seed', seed);
   history.replaceState(null, '', newUrl);
-
-  // Share link
   document.getElementById('shareLink').value = newUrl.toString();
 
-  // Show result
   document.getElementById('setup').style.display = 'none';
   document.getElementById('result').style.display = 'block';
 
-  // Render doors
   const calendar = document.getElementById('calendar');
   calendar.innerHTML = '';
+  const today = new Date();
+  const isDecember = today.getMonth() === 11;
+  const todayNum = today.getDate();
+
   distances.forEach((dist, i) => {
     const day = i + 1;
     const door = document.createElement('div');
     door.className = 'door';
+    if (isDecember && day === todayNum) door.classList.add('today');
     door.innerHTML = `
       <div class="front">${day}</div>
       <div class="back">
-        <div>Dec ${day}</div>
+        <div>${day}. dec</div>
         <div class="distance">${dist} km</div>
       </div>
     `;
-    door.addEventListener('click', () => door.classList.toggle('flipped'));
+    door.addEventListener('click', () => {
+      door.classList.toggle('flipped');
+      const audio = document.getElementById('jingle');
+      audio.currentTime = 0;
+      audio.play().catch(() => {});
+    });
     calendar.appendChild(door);
   });
 }
+
+function copyLink() {
+  const link = document.getElementById('shareLink');
+  link.select();
+  document.execCommand('copy');
+  alert('Povezava kopirana!');
+}
+
+// Auto-load if seed in URL
+if (urlSeed) generateCalendar(urlSeed);
 </script>
 </body>
 </html>
