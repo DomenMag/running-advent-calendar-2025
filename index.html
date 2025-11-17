@@ -18,8 +18,8 @@
     margin: 2rem 0 1rem; font-size: 2.4rem; text-shadow: 0 2px 4px rgba(0,0,0,.5);
     z-index: 2;
   }
-h1::before { content: "🎄"; margin-right: 12px; font-size: 2rem; }
-h1::after { content: "🎄"; margin-left: 12px; font-size: 2rem; }
+  h1::before { content: "🎄"; margin-right: 12px; font-size: 2rem; }
+  h1::after { content: "🎄"; margin-left: 12px; font-size: 2rem; }
   .container { max-width: 900px; width: 100%; padding: 0 1rem; z-index: 2; }
   .setup {
     text-align: center; background: rgba(0,0,0,.3); padding: 1.5rem; border-radius: 12px; margin: 1rem 0;
@@ -33,9 +33,17 @@ h1::after { content: "🎄"; margin-left: 12px; font-size: 2rem; }
     border: none; border-radius: 6px; cursor: pointer; transition: .2s;
   }
   button:hover { background: #ff1a1a; }
+  /* ---- 4×6 GRID ---- */
   .calendar {
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-    gap: 12px; perspective: 1000px; margin: 2rem 0; z-index: 2;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);   /* 4 columns */
+    grid-template-rows: repeat(6, 1fr);      /* 6 rows  */
+    gap: 12px;
+    perspective: 1000px;
+    margin: 2rem 0;
+    z-index: 2;
+    max-width: 800px;          /* optional – keeps it tidy on large screens */
+    width: 100%;
   }
   .door {
     position: relative; width: 100%; padding-bottom: 100%; background: var(--red);
@@ -64,7 +72,6 @@ h1::after { content: "🎄"; margin-left: 12px; font-size: 2rem; }
   .print-btn button { background: #4CAF50; }
   .print-btn button:hover { background: #45a049; }
   footer { margin: 2rem 0; font-size: .9rem; opacity: .8; z-index: 2; }
-
   /* --- SNEŽINKE (BREZ SCROLLA) --- */
   .snow-container {
     position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
@@ -80,13 +87,10 @@ h1::after { content: "🎄"; margin-left: 12px; font-size: 2rem; }
 </style>
 </head>
 <body>
-
 <!-- Snežinke container -->
 <div class="snow-container" id="snowContainer"></div>
-
 <div class="container">
   <h1>Božični Tekaški Koledar 2025</h1>
-
   <div class="setup" id="setup">
     <p><strong>Vnesi skrivno geslo</strong> (npr. tvoje ime, ekipa ali "slovenia2025"):</p>
     <input type="text" id="seedInput" placeholder="Vnesi tukaj..." value="">
@@ -95,7 +99,6 @@ h1::after { content: "🎄"; margin-left: 12px; font-size: 2rem; }
       Deli <u>isto geslo</u> → vsi imajo <u>isti vrstni red</u>!
     </p>
   </div>
-
   <div id="result" style="display:none;">
     <div class="share">
       <p><strong>Deli povezavo:</strong></p>
@@ -108,15 +111,12 @@ h1::after { content: "🎄"; margin-left: 12px; font-size: 2rem; }
     <div class="calendar" id="calendar"></div>
   </div>
 </div>
-
 <footer>
   Odpri eno vratca na dan: 1.–24. december | Skupaj: 300 km | #TekNaBožič
 </footer>
-
 <audio id="jingle" src="https://cdn.freesound.org/previews/612/612552_5674468-lq.mp3" preload="auto"></audio>
-
 <script>
-// --- SNEŽINKE (POPRAVLJENO: prave snežinke!) ---
+// --- SNEŽINKE ---
 const snowContainer = document.getElementById('snowContainer');
 function createSnowflake() {
   const s = document.createElement('div');
@@ -164,36 +164,30 @@ function loadSeed() { return localStorage.getItem(STORAGE_KEY); }
 const urlParams = new URLSearchParams(window.location.search);
 const urlSeed = urlParams.get('seed');
 const savedSeed = loadSeed();
-
 if (urlSeed || savedSeed) {
   const seed = urlSeed || savedSeed;
   document.getElementById('seedInput').value = seed;
   generateCalendar(seed);
 }
-
 document.getElementById('generate').addEventListener('click', () => {
   const seed = document.getElementById('seedInput').value.trim();
   if (!seed) return alert('Vnesi geslo!');
   saveSeed(seed);
   generateCalendar(seed);
 });
-
 function generateCalendar(seed = document.getElementById('seedInput').value.trim()) {
   const distances = seededShuffle(Array.from({length: 24}, (_, i) => i + 1), seed);
   const newUrl = new URL(window.location);
   newUrl.searchParams.set('seed', seed);
   history.replaceState(null, '', newUrl);
   document.getElementById('shareLink').value = newUrl.toString();
-
   document.getElementById('setup').style.display = 'none';
   document.getElementById('result').style.display = 'block';
-
   const calendar = document.getElementById('calendar');
   calendar.innerHTML = '';
   const today = new Date();
   const isDecember = today.getMonth() === 11;
   const todayNum = today.getDate();
-
   distances.forEach((dist, i) => {
     const day = i + 1;
     const door = document.createElement('div');
@@ -215,14 +209,12 @@ function generateCalendar(seed = document.getElementById('seedInput').value.trim
     calendar.appendChild(door);
   });
 }
-
 function copyLink() {
   const link = document.getElementById('shareLink');
   link.select();
   document.execCommand('copy');
   alert('Povezava kopirana!');
 }
-
 // Auto-load if seed in URL
 if (urlSeed) generateCalendar(urlSeed);
 </script>
