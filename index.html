@@ -33,20 +33,27 @@
     border: none; border-radius: 6px; cursor: pointer; transition: .2s;
   }
   button:hover { background: #ff1a1a; }
-  /* ---- 4×6 GRID ---- */
+
+  /* ---- FIXED 4×6 GRID ---- */
   .calendar {
     display: grid;
     grid-template-columns: repeat(4, 1fr);   /* 4 columns */
-    grid-template-rows: repeat(6, 1fr);      /* 6 rows  */
+    grid-template-rows: repeat(6, 1fr);      /* 6 rows */
     gap: 12px;
     perspective: 1000px;
-    margin: 2rem 0;
+    margin: 2rem auto;
     z-index: 2;
-    max-width: 800px;          /* optional – keeps it tidy on large screens */
+    max-width: 800px;
     width: 100%;
+    /* Force square cells */
+    aspect-ratio: 4 / 6;
   }
+  .calendar > .door {
+    aspect-ratio: 1 / 1;   /* keep doors square */
+  }
+
   .door {
-    position: relative; width: 100%; padding-bottom: 100%; background: var(--red);
+    position: relative; width: 100%; padding-bottom: 100%; background: var(--  red);
     border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,.4); cursor: pointer;
     transition: transform .3s; overflow: hidden;
   }
@@ -72,7 +79,8 @@
   .print-btn button { background: #4CAF50; }
   .print-btn button:hover { background: #45a049; }
   footer { margin: 2rem 0; font-size: .9rem; opacity: .8; z-index: 2; }
-  /* --- SNEŽINKE (BREZ SCROLLA) --- */
+
+  /* --- SNEŽINKE --- */
   .snow-container {
     position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
     pointer-events: none; z-index: 1; overflow: hidden;
@@ -87,7 +95,6 @@
 </style>
 </head>
 <body>
-<!-- Snežinke container -->
 <div class="snow-container" id="snowContainer"></div>
 <div class="container">
   <h1>Božični Tekaški Koledar 2025</h1>
@@ -175,6 +182,7 @@ document.getElementById('generate').addEventListener('click', () => {
   saveSeed(seed);
   generateCalendar(seed);
 });
+
 function generateCalendar(seed = document.getElementById('seedInput').value.trim()) {
   const distances = seededShuffle(Array.from({length: 24}, (_, i) => i + 1), seed);
   const newUrl = new URL(window.location);
@@ -188,6 +196,7 @@ function generateCalendar(seed = document.getElementById('seedInput').value.trim
   const today = new Date();
   const isDecember = today.getMonth() === 11;
   const todayNum = today.getDate();
+
   distances.forEach((dist, i) => {
     const day = i + 1;
     const door = document.createElement('div');
@@ -208,13 +217,20 @@ function generateCalendar(seed = document.getElementById('seedInput').value.trim
     });
     calendar.appendChild(door);
   });
+
+  /* ---- FORCE 4×6 GRID (critical for some browsers) ---- */
+  calendar.style.display = 'grid';
+  calendar.style.gridTemplateColumns = 'repeat(4, 1fr)';
+  calendar.style.gridTemplateRows = 'repeat(6, 1fr)';
 }
+
 function copyLink() {
   const link = document.getElementById('shareLink');
   link.select();
   document.execCommand('copy');
   alert('Povezava kopirana!');
 }
+
 // Auto-load if seed in URL
 if (urlSeed) generateCalendar(urlSeed);
 </script>
