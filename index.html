@@ -85,52 +85,67 @@
       margin-left: auto;
       margin-right: auto;
     }
+
+    /* VRATA - POPRAVLJEN 3D FLIP */
     .door {
       position: relative;
       width: 100%;
       padding-bottom: 100%;
-      background: #c41e3a;
+      cursor: pointer;
+      transform-style: preserve-3d;
+      transition: transform 0.6s;
       border-radius: 8px;
       box-shadow: 0 4px 8px rgba(0,0,0,.4);
-      cursor: pointer;
-      transition: transform .3s;
-      overflow: hidden;
-      transform-style: preserve-3d;
     }
-    .door:hover { transform: translateY(-4px); }
-    .door .front, .door .back {
+    .door:hover {
+      transform: translateY(-4px) !important;
+    }
+
+    .door .side {
       position: absolute;
       inset: 0;
       backface-visibility: hidden;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
       border-radius: 8px;
+      padding: 8px;
+      box-sizing: border-box;
     }
+
     .door .front {
       background: linear-gradient(135deg, #c41e3a, #ff4d4d);
       color: #fff;
-      font-size: 1.8rem;
+      font-size: 2rem;
+      font-weight: bold;
       text-shadow: 0 1px 2px rgba(0,0,0,.5);
     }
+
     .door .back {
       background: #fff;
       color: #c41e3a;
       transform: rotateY(180deg);
-      font-size: 1.2rem;
-      flex-direction: column;
-      padding: 8px;
-      justify-content: center;
+      font-size: 1.1rem;
       text-align: center;
     }
+
+    .door .back .date {
+      font-weight: bold;
+      font-size: 1.3rem;
+      margin-bottom: 4px;
+    }
+
+    .door .back .distance {
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: #c41e3a;
+    }
+
     .door.flipped {
       transform: rotateY(180deg);
     }
-    .distance {
-      font-size: 1.8rem;
-      margin-top: 4px;
-      font-weight: bold;
-    }
+
     .share {
       margin: 1.5rem 0;
       font-size: 0.9rem;
@@ -157,6 +172,7 @@
       opacity: .8;
       text-align: center;
     }
+
     @media (max-width: 700px) {
       .calendar {
         grid-template-columns: repeat(4, 1fr);
@@ -276,14 +292,14 @@
         const door = document.createElement('div');
         door.className = 'door';
         door.innerHTML = `
-          <div class="front">${day}</div>
-          <div class="back">
-            <div><strong>${day}. dec</strong></div>
+          <div class="side front">${day}</div>
+          <div class="side back">
+            <div class="date">${day}. dec</div>
             <div class="distance">${dist} km</div>
           </div>
         `;
 
-        // VSA VRATA SO KLIKABILNA
+        // KLIK → OBRNE SE IN POKAŽE ZADNJO STRAN
         door.addEventListener('click', () => {
           door.classList.toggle('flipped');
         });
