@@ -71,15 +71,8 @@
       border: none;
       border-radius: 6px;
       cursor: pointer;
-      margin: 0 4px;
     }
     button:hover { background: #ff1a1a; }
-    button.test-mode {
-      background: #4CAF50;
-    }
-    button.test-mode:hover {
-      background: #45a049;
-    }
 
     .calendar {
       display: grid;
@@ -158,23 +151,11 @@
       border-radius: 12px;
       backdrop-filter: blur(4px);
     }
-    .test-mode-info {
-      font-size: 0.9rem;
-      color: #ffeb3b;
-      margin-top: 1rem;
-    }
     footer {
       margin: 2rem 0;
       font-size: .9rem;
       opacity: .8;
       text-align: center;
-    }
-    .locked {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-    .locked:hover {
-      transform: none;
     }
     @media (max-width: 700px) {
       .calendar {
@@ -200,16 +181,12 @@
     </div>
 
     <div id="result" style="display:none;">
-      <div style="text-align:center; margin-bottom:1rem;">
-        <button id="toggleTest" class="test-mode">Testni način: IZKLJUČEN</button>
-        <p class="test-mode-info" id="testInfo">V testnem načinu so vsa vrata odprta (samo za testiranje!)</p>
-      </div>
       <div class="share">
         <p><strong>Deli to povezavo:</strong></p>
         <input type="text" id="shareLink" readonly />
       </div>
       <div class="calendar" id="calendar"></div>
-      <div class="total-km" id="totalKm">Skupaj: 0 km</div>
+      <div class="total-km">Skupaj: 300 km</div>
     </div>
   </div>
 
@@ -256,25 +233,6 @@
       return arr;
     }
 
-    // --- Test Mode ---
-    let testMode = false;
-    const testButton = document.getElementById('toggleTest');
-    const testInfo = document.getElementById('testInfo');
-
-    testButton.addEventListener('click', () => {
-      testMode = !testMode;
-      testButton.textContent = `Testni način: ${testMode ? 'VKLJUČEN' : 'IZKLJUČEN'}`;
-      testButton.style.background = testMode ? '#45a049' : '#4CAF50';
-      testInfo.style.display = testMode ? 'block' : 'none';
-      generateCalendar(); // ponovno nariše
-    });
-
-    // --- Date Logic ---
-    const today = new Date();
-    const currentMonth = today.getMonth() + 1;
-    const currentDay = today.getDate();
-    const isDecember = currentMonth === 12;
-
     // --- URL Handling ---
     const urlParams = new URLSearchParams(window.location.search);
     const urlSeed = urlParams.get('seed');
@@ -295,7 +253,6 @@
 
       const seed = encodeURIComponent(seedInput);
       const distances = seededShuffle(Array.from({length: 24}, (_, i) => i + 1), seedInput);
-      const totalKm = 300; // 1+2+...+24
 
       // Update URL
       const newUrl = new URL(window.location);
@@ -309,20 +266,15 @@
       document.getElementById('setup').style.display = 'none';
       document.getElementById('result').style.display = 'block';
 
-      // Update total
-      document.getElementById('totalKm').textContent = `Skupaj: ${totalKm} km`;
-
       // Render doors
       const calendar = document.getElementById('calendar');
       calendar.innerHTML = '';
 
       distances.forEach((dist, i) => {
         const day = i + 1;
-        const unlockedUpTo = testMode ? 24 : (isDecember ? currentDay : 0);
-        const isLocked = day > unlockedUpTo;
 
         const door = document.createElement('div');
-        door.className = `door ${isLocked ? 'locked' : ''}`;
+        door.className = 'door';
         door.innerHTML = `
           <div class="front">${day}</div>
           <div class="back">
@@ -331,13 +283,10 @@
           </div>
         `;
 
-        if (!isLocked) {
-          door.addEventListener('click', () => {
-            door.classList.toggle('flipped');
-          });
-        } else if (!testMode) {
-          door.title = `Zaklenjeno do ${day}. decembra`;
-        }
+        // VSA VRATA SO KLIKABILNA
+        door.addEventListener('click', () => {
+          door.classList.toggle('flipped');
+        });
 
         calendar.appendChild(door);
       });
