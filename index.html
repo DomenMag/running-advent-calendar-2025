@@ -2,7 +2,7 @@
 <html lang="sl">
 <head>
   <meta charset="UTF-8" />
-  <title>🎄 Božični Tekaški Koledar 2025 🎄</title>
+  <title>Božični Tekaški Koledar 2025</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     body {
@@ -19,7 +19,7 @@
       position: relative;
     }
 
-    /* Snowflakes */
+    /* Snežinke */
     .snowflake {
       position: absolute;
       top: -10px;
@@ -71,8 +71,15 @@
       border: none;
       border-radius: 6px;
       cursor: pointer;
+      margin: 0 4px;
     }
     button:hover { background: #ff1a1a; }
+    button.test-mode {
+      background: #4CAF50;
+    }
+    button.test-mode:hover {
+      background: #45a049;
+    }
 
     .calendar {
       display: grid;
@@ -121,6 +128,7 @@
       flex-direction: column;
       padding: 8px;
       justify-content: center;
+      text-align: center;
     }
     .door.flipped {
       transform: rotateY(180deg);
@@ -150,6 +158,11 @@
       border-radius: 12px;
       backdrop-filter: blur(4px);
     }
+    .test-mode-info {
+      font-size: 0.9rem;
+      color: #ffeb3b;
+      margin-top: 1rem;
+    }
     footer {
       margin: 2rem 0;
       font-size: .9rem;
@@ -170,20 +183,14 @@
         gap: 10px;
       }
       h1 { font-size: 2rem; }
-      input { width: 100%; margin: 8px 0; }
-    }
-    @media (max-width: 500px) {
-      .calendar {
-        grid-template-columns: repeat(3, 1fr);
-        grid-template-rows: repeat(8, 1fr);
-      }
+      input, button { width: 100%; margin: 8px 0; }
     }
   </style>
 </head>
 <body>
 
   <div class="container">
-    <h1>🎄 Božični Tekaški Koledar 2025 🎄</h1>
+    <h1>Božični Tekaški Koledar 2025</h1>
 
     <div class="setup" id="setup">
       <p><strong>Vnesi skrivni ključ</strong> (npr. tvoje ime, ekipa ali "slovenija2025"):</p>
@@ -193,6 +200,10 @@
     </div>
 
     <div id="result" style="display:none;">
+      <div style="text-align:center; margin-bottom:1rem;">
+        <button id="toggleTest" class="test-mode">Testni način: IZKLJUČEN</button>
+        <p class="test-mode-info" id="testInfo">V testnem načinu so vsa vrata odprta (samo za testiranje!)</p>
+      </div>
       <div class="share">
         <p><strong>Deli to povezavo:</strong></p>
         <input type="text" id="shareLink" readonly />
@@ -207,7 +218,7 @@
   </footer>
 
   <script>
-    // --- Snowflakes ---
+    // --- Snežinke ---
     function createSnowflake() {
       const snowflake = document.createElement('div');
       snowflake.className = 'snowflake';
@@ -217,7 +228,6 @@
       snowflake.style.fontSize = Math.random() * 10 + 10 + 'px';
       snowflake.style.animationDelay = Math.random() * 5 + 's';
       document.body.appendChild(snowflake);
-
       setTimeout(() => snowflake.remove(), 10000);
     }
     setInterval(createSnowflake, 300);
@@ -246,12 +256,24 @@
       return arr;
     }
 
+    // --- Test Mode ---
+    let testMode = false;
+    const testButton = document.getElementById('toggleTest');
+    const testInfo = document.getElementById('testInfo');
+
+    testButton.addEventListener('click', () => {
+      testMode = !testMode;
+      testButton.textContent = `Testni način: ${testMode ? 'VKLJUČEN' : 'IZKLJUČEN'}`;
+      testButton.style.background = testMode ? '#45a049' : '#4CAF50';
+      testInfo.style.display = testMode ? 'block' : 'none';
+      generateCalendar(); // ponovno nariše
+    });
+
     // --- Date Logic ---
     const today = new Date();
     const currentMonth = today.getMonth() + 1;
     const currentDay = today.getDate();
     const isDecember = currentMonth === 12;
-    const unlockedUpTo = isDecember ? currentDay : 0;
 
     // --- URL Handling ---
     const urlParams = new URLSearchParams(window.location.search);
@@ -273,7 +295,7 @@
 
       const seed = encodeURIComponent(seedInput);
       const distances = seededShuffle(Array.from({length: 24}, (_, i) => i + 1), seedInput);
-      const totalKm = distances.reduce((a, b) => a + b, 0); // 1+2+...+24 = 300
+      const totalKm = 300; // 1+2+...+24
 
       // Update URL
       const newUrl = new URL(window.location);
@@ -296,6 +318,7 @@
 
       distances.forEach((dist, i) => {
         const day = i + 1;
+        const unlockedUpTo = testMode ? 24 : (isDecember ? currentDay : 0);
         const isLocked = day > unlockedUpTo;
 
         const door = document.createElement('div');
@@ -303,7 +326,7 @@
         door.innerHTML = `
           <div class="front">${day}</div>
           <div class="back">
-            <div>${day}. dec</div>
+            <div><strong>${day}. dec</strong></div>
             <div class="distance">${dist} km</div>
           </div>
         `;
@@ -312,7 +335,7 @@
           door.addEventListener('click', () => {
             door.classList.toggle('flipped');
           });
-        } else {
+        } else if (!testMode) {
           door.title = `Zaklenjeno do ${day}. decembra`;
         }
 
