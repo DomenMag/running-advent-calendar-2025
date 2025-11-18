@@ -17,17 +17,19 @@
       align-items: center;
       overflow-x: hidden;
       position: relative;
+      overflow: hidden;
     }
 
     /* Snežinke */
     .snowflake {
-      position: absolute;
+      position: fixed;
       top: -10px;
       color: #fff;
       font-size: 1.2em;
       pointer-events: none;
       animation: fall linear infinite;
       opacity: 0.8;
+      z-index: 9999;
     }
     @keyframes fall {
       to {
@@ -321,6 +323,7 @@
   </script>
 </body>
 </html>
+
 
 
 
