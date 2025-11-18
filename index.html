@@ -283,7 +283,15 @@
       // Show result
       document.getElementById('setup').style.display = 'none';
       document.getElementById('result').style.display = 'block';
-
+      // NOVO: gumb za nazaj
+      document.getElementById('backToSetup').addEventListener('click', () => {
+      document.getElementById('result').style.display = 'none';
+      document.getElementById('setup').style.display = 'block';
+      document.getElementById('seedInput').value = '';
+      // Počistimo parameter iz URL-ja (lepo in čisto)
+      history.replaceState(null, '', window.location.pathname);
+      document.getElementById('calendar').innerHTML = '';
+      });
       // Render doors
       const calendar = document.getElementById('calendar');
       calendar.innerHTML = '';
@@ -313,6 +321,7 @@
   </script>
 </body>
 </html>
+
 
 
 
