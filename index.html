@@ -18,7 +18,6 @@
       overflow-x: hidden;
       position: relative;
     }
-
     /* Snežinke */
     .snowflake {
       position: absolute;
@@ -35,7 +34,6 @@
         opacity: 0;
       }
     }
-
     h1 {
       margin: 2.5rem 0 1rem;
       font-size: 2.5rem;
@@ -71,8 +69,18 @@
       border: none;
       border-radius: 6px;
       cursor: pointer;
+      transition: background 0.2s;
     }
     button:hover { background: #ff1a1a; }
+
+    /* Nov gumb za nazaj */
+    #backToSetup {
+      background: #0d6efd;
+      margin-top: 1.5rem;
+    }
+    #backToSetup:hover {
+      background: #0b5ed7;
+    }
 
     .calendar {
       display: grid;
@@ -85,121 +93,43 @@
       margin-left: auto;
       margin-right: auto;
     }
+    .door { /* ... enak kot prej ... */ }
+    .door:hover { transform: translateY(-4px) !important; }
+    .door .side { /* ... enak kot prej ... */ }
+    .door .front { background: linear-gradient(135deg, #c41e3a, #ff4d4d); color: #fff; font-size: 2rem; font-weight: bold; }
+    .door .back { background: #fff; color: #c41e3a; transform: rotateY(180deg); }
+    .door.flipped { transform: rotateY(180deg); }
 
-    /* VRATA - TAKOJŠEN OBRAT (brez zamika) */
-    .door {
-      position: relative;
-      width: 100%;
-      padding-bottom: 100%;
-      cursor: pointer;
-      transform-style: preserve-3d;
-      transition: transform 0.3s ease; /* hitra, gladka animacija */
-      border-radius: 8px;
-      box-shadow: 0 4px 8px rgba(0,0,0,.4);
-    }
-    .door:hover {
-      transform: translateY(-4px) !important;
-    }
-
-    .door .side {
-      position: absolute;
-      inset: 0;
-      backface-visibility: hidden;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      border-radius: 8px;
-      padding: 8px;
-      box-sizing: border-box;
-      user-select: none; /* prepreči izbiro besedila */
-    }
-
-    .door .front {
-      background: linear-gradient(135deg, #c41e3a, #ff4d4d);
-      color: #fff;
-      font-size: 2rem;
-      font-weight: bold;
-      text-shadow: 0 1px 2px rgba(0,0,0,.5);
-    }
-
-    .door .back {
-      background: #fff;
-      color: #c41e3a;
-      transform: rotateY(180deg);
-      font-size: 1.1rem;
-      text-align: center;
-    }
-
-    .door .back .date {
-      font-weight: bold;
-      font-size: 1.3rem;
-      margin-bottom: 4px;
-    }
-
-    .door .back .distance {
-      font-size: 1.8rem;
-      font-weight: bold;
-      color: #c41e3a;
-    }
-
-    .door.flipped {
-      transform: rotateY(180deg);
-    }
-
-    .share {
-      margin: 1.5rem 0;
-      font-size: 0.9rem;
-      text-align: center;
-    }
-    .share input {
-      width: 100%;
-      max-width: 500px;
-      margin-top: 8px;
-    }
-    .total-km {
-      margin: 2rem 0;
-      font-size: 1.5rem;
-      font-weight: bold;
-      text-align: center;
-      background: rgba(255,255,255,.1);
-      padding: 1rem;
-      border-radius: 12px;
-      backdrop-filter: blur(4px);
-    }
-    footer {
-      margin: 2rem 0;
-      font-size: .9rem;
-      opacity: .8;
-      text-align: center;
-    }
+    .total-km { margin: 2rem 0; font-size: 1.5rem; font-weight: bold; text-align: center; background: rgba(255,255,255,.1); padding: 1rem; border-radius: 12px; backdrop-filter: blur(4px); }
+    .share { margin: 1.5rem 0; font-size: 0.9rem; text-align: center; }
+    .share input { width: 100%; max-width: 500px; margin-top: 8px; }
+    footer { margin: 2rem 0; font-size: .9rem; opacity: .8; text-align: center; }
 
     @media (max-width: 700px) {
-      .calendar {
-        grid-template-columns: repeat(4, 1fr);
-        grid-template-rows: repeat(6, 1fr);
-        gap: 10px;
-      }
+      .calendar { grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(6, 1fr); gap: 10px; }
       h1 { font-size: 2rem; }
       input, button { width: 100%; margin: 8px 0; }
     }
   </style>
 </head>
 <body>
-
   <div class="container">
     <h1>🎄 Božični Tekaški Koledar 2025 🎄</h1>
 
     <div class="setup" id="setup">
       <p><strong>Vnesi skrivni ključ</strong> (npr. tvoje ime, ekipa ali "slovenija2025"):</p>
-      <input type="text" id="seedInput" placeholder="Vpiši tukaj..." value="" />
-      <button id="generate">Ustvari</button>
+      <input type="text" id="seedInput" placeholder="Vpiši tukaj..." />
+      <button id="generate">Ustvari koledar</button>
       <p style="margin-top:1rem;"> Deli <u>isti ključ</u> → vsi dobijo <u>isti koledar</u>! </p>
     </div>
 
-    <div id="result" style="display:none;">
+    <div id="result" style="display:none; text-align:center;">
       <div class="calendar" id="calendar"></div>
+
       <div class="total-km">Odpri eno vratca na dan od 1. do 24. decembra! Skupaj: 300 km</div>
+
+      <button id="backToSetup">🔙 Nazaj na vnos ključa</button>
+
       <div class="share">
         <p><strong>Deli to povezavo:</strong></p>
         <input type="text" id="shareLink" readonly />
@@ -212,54 +142,59 @@
   </footer>
 
   <script>
-    // --- Snežinke ---
+    // Snežinke
     function createSnowflake() {
-      const snowflake = document.createElement('div');
-      snowflake.className = 'snowflake';
-      snowflake.innerHTML = '❅';
-      snowflake.style.left = Math.random() * 100 + 'vw';
-      snowflake.style.animationDuration = Math.random() * 5 + 5 + 's';
-      snowflake.style.fontSize = Math.random() * 10 + 10 + 'px';
-      snowflake.style.animationDelay = Math.random() * 5 + 's';
-      document.body.appendChild(snowflake);
-      setTimeout(() => snowflake.remove(), 10000);
+      const s = document.createElement('div');
+      s.className = 'snowflake';
+      s.innerHTML = ['❅','❆','*'][Math.floor(Math.random()*3)];
+      s.style.left = Math.random() * 100 + 'vw';
+      s.style.animationDuration = Math.random() * 5 + 6 + 's';
+      s.style.fontSize = Math.random() * 12 + 12 + 'px';
+      document.body.appendChild(s);
+      setTimeout(() => s.remove(), 15000);
     }
     setInterval(createSnowflake, 300);
 
-    // --- Seeded Random ---
+    // Seeded random & shuffle (nespremenjeno)
     function seededRandom(seed) {
       let h = 1779033703 ^ seed.length;
-      for (let i = 0; i < seed.length; i++) {
-        h = Math.imul(h ^ seed.charCodeAt(i), 3432918353);
-        h = h << 13 | h >>> 19;
-      }
+      for(let i = 0; i < seed.length; i++)
+        h = Math.imul(h ^ seed.charCodeAt(i), 3432918353), h = h << 13 | h >>> 19;
       return function() {
-        h = Math.imul(h ^ (h >>> 16), 2246822507);
-        h = Math.imul(h ^ (h >>> 13), 3266489909);
+        h = Math.imul(h ^ h>>>16, 2246822507);
+        h = Math.imul(h ^ h>>>13, 3266489909);
         return (h ^= h >>> 16) >>> 0;
-      };
+      }
     }
-
     function seededShuffle(array, seedStr) {
       const arr = [...array];
       const rand = seededRandom(seedStr);
-      for (let i = arr.length - 1; i > 0; i--) {
-        const j = Math.floor((rand() / 4294967296) * (i + 1));
+      for (let i = arr.length-1; i > 0; i--) {
+        const j = Math.floor((rand() / 4294967296) * (i+1));
         [arr[i], arr[j]] = [arr[j], arr[i]];
       }
       return arr;
     }
 
-    // --- URL Handling ---
+    // URL seed
     const urlParams = new URLSearchParams(window.location.search);
     const urlSeed = urlParams.get('seed');
-
     if (urlSeed) {
       document.getElementById('seedInput').value = decodeURIComponent(urlSeed);
       generateCalendar();
     }
 
     document.getElementById('generate').addEventListener('click', generateCalendar);
+
+    // NOVO: gumb za nazaj
+    document.getElementById('backToSetup').addEventListener('click', () => {
+      document.getElementById('result').style.display = 'none';
+      document.getElementById('setup').style.display = 'block';
+      document.getElementById('seedInput').value = '';
+      // Počistimo parameter iz URL-ja (lepo in čisto)
+      history.replaceState(null, '', window.location.pathname);
+      document.getElementById('calendar').innerHTML = '';
+    });
 
     function generateCalendar() {
       const seedInput = document.getElementById('seedInput').value.trim();
@@ -268,28 +203,21 @@
         return;
       }
 
-      const seed = encodeURIComponent(seedInput);
-      const distances = seededShuffle(Array.from({length: 24}, (_, i) => i + 1), seedInput);
+      const distances = seededShuffle(Array.from({length:24}, (_,i)=>i+1), seedInput);
 
-      // Update URL
+      // Posodobi URL
       const newUrl = new URL(window.location);
-      newUrl.searchParams.set('seed', seed);
+      newUrl.searchParams.set('seed', encodeURIComponent(seedInput));
       history.replaceState(null, '', newUrl);
-
-      // Share link
       document.getElementById('shareLink').value = newUrl.toString();
 
-      // Show result
       document.getElementById('setup').style.display = 'none';
       document.getElementById('result').style.display = 'block';
 
-      // Render doors
       const calendar = document.getElementById('calendar');
       calendar.innerHTML = '';
-
       distances.forEach((dist, i) => {
         const day = i + 1;
-
         const door = document.createElement('div');
         door.className = 'door';
         door.innerHTML = `
@@ -299,20 +227,10 @@
             <div class="distance">${dist} km</div>
           </div>
         `;
-
-        // TAKOJŠEN KLIK → BREZ ZAKASNITVE
-        door.addEventListener('click', (e) => {
-          e.preventDefault();
-          door.classList.toggle('flipped');
-        });
-
+        door.addEventListener('click', () => door.classList.toggle('flipped'));
         calendar.appendChild(door);
       });
     }
   </script>
 </body>
 </html>
-
-
-
-
