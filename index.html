@@ -54,13 +54,12 @@
 
     /* KLJUČNA POPRAVKA ZA MOBILNE – samo ta del je nov */
     #result > div { width: 100%; } /* zagotovi, da se vsi otroci pravilno razširijo */
-    #backToSetup {
-      background: #0d6efd !important;
-      margin: 2rem auto 1rem;
-      display: block !important;
-      width: fit-content;
-      padding: 14px 32px;
-      font-size: 1.1rem;
+    .hidden { display: none; }
+    #backToSetup { 
+    background: #0d6efd; 
+    padding: 14px 32px; 
+    font-size: 1.1rem; 
+    border-radius: 8px;
     }
 
     @media (max-width: 700px) {
@@ -82,18 +81,20 @@
     </div>
 
     <!-- EDINA SPREMEMBA: odstranjen inline text-align:center; -->
-    <div id="result" style="display:none;">
+    <!-- NOVO – deluje na VSEH telefonih -->
+    <div id="result" class="hidden">
       <div class="calendar" id="calendar"></div>
       <div class="total-km">Odpri eno vratca na dan od 1. do 24. decembra! Skupaj: 300 km</div>
-      
-      <button id="backToSetup">🔙 Nazaj na vnos ključa</button>
-
+      <div style="text-align:center; margin:2rem 0;">
+        <button id="backToSetup">🔙 Nazaj na vnos ključa</button>
+      </div>
       <div class="share">
         <p><strong>Deli to povezavo:</strong></p>
         <input type="text" id="shareLink" readonly />
       </div>
     </div>
   </div>
+    
 
   <footer>Natisni: Ctrl+P → Shrani kot PDF</footer>
 
@@ -170,3 +171,4 @@
   </script>
 </body>
 </html>
+
